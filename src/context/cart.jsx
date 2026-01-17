@@ -4,15 +4,16 @@ import { children, createContext, useState } from "react";
 export const CartContext = createContext();
 
 // Crear provider
-export function CartProvider ({children}){
+export function CartProvider({ children }) {
+    // Intentar cargar el carrito de localStorage al iniciar
     const [cart, setCart] = useState([])
 
-    const addToCart = product =>{
+    const addToCart = product => {
         // Verificar si el producto esta en el carrito
         const productInCart = cart.findIndex(item => item.id === product.id)
-        
+
         // Cuando ya estaba en el carrito, a la cantidad del item se le añade 1
-        if(productInCart >= 0){
+        if (productInCart >= 0) {
             const newCart = structuredClone(cart); // Creamos copia de cart para que cuando se modifique se reenderice
             newCart[productInCart].cantidad += 1
             return setCart(newCart)
@@ -20,7 +21,7 @@ export function CartProvider ({children}){
 
         // Si el producto no esta en el carrito
         // Usa el estado anterior, crea un nuevo array manteniendo lo que habia previamente, pero añadiendo el producto con la cantidad 1
-        setCart(prevState =>([
+        setCart(prevState => ([
             ...prevState,
             {
                 ...product,
@@ -29,7 +30,21 @@ export function CartProvider ({children}){
         ]))
     }
 
-    const removeFromCart = product =>{
+    const decrementQuantity = product => {
+        const productInCart = cart.findIndex(item => item.id === product.id)
+
+        if (productInCart >= 0) {
+            const newCart = structuredClone(cart)
+            if (newCart[productInCart].cantidad > 1) {
+                newCart[productInCart].cantidad -= 1
+            } else {
+                newCart.splice(productInCart, 1)
+            }
+            setCart(newCart)
+        }
+    }
+
+    const removeFromCart = product => {
         const newCart = structuredClone(cart)
         const index = newCart.findIndex(item => item.id === product.id)
 
@@ -41,12 +56,13 @@ export function CartProvider ({children}){
         setCart([])
     }
 
-    return(
+    return (
         <CartContext.Provider value={{
             cart,
             addToCart,
             clearCart,
-            removeFromCart
+            removeFromCart,
+            decrementQuantity
         }}>
             {children}
         </CartContext.Provider>

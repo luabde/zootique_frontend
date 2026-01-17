@@ -1,16 +1,23 @@
 
-import { CartItem } from "../components/CartItem"; 
+import { CartItem } from "../components/CartItem";
 import { useCart } from "../hook/useCart";
 import { ClearCartIcon } from "../components/clearCartIcon";
 
-export default function Cart(){
+export default function Cart() {
 
-  const { cart, clearCart, addToCart } = useCart()
+  const { cart, clearCart, addToCart, decrementQuantity, removeFromCart } = useCart()
+
+  let subtotalCalculado = 0;
+  cart.forEach(item => {
+    subtotalCalculado += Number(item.precio) * Number(item.cantidad)
+  })
+  const subtotal = subtotalCalculado;
+  const shipping = cart.length > 0 ? 5.99 : 0
+  const discount = 0
+  const total = subtotal - discount + shipping
 
   return (
     <div className="max-w-7xl mx-auto p-4 lg:p-8">
-      <h1 className="text-3xl font-bold mb-8">Carrito</h1>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-sm">
@@ -25,8 +32,8 @@ export default function Cart(){
               {cart.length === 0 ? (
                 <div className="py-12 text-center">
                   <p className="text-gray-500 text-lg">Tu carrito está vacío</p>
-                  <a 
-                    href="/" 
+                  <a
+                    href="/"
                     className="mt-4 inline-block text-emerald-600 hover:text-emerald-700 font-medium"
                   >
                     Ir a la tienda
@@ -34,11 +41,17 @@ export default function Cart(){
                 </div>
               ) : (
                 cart.length > 0 && (
-                    cart.map(item => {
-                        return(
-                          <CartItem key={item.id} prod={item} addToCart={addToCart}/>
-                        )
-                    })
+                  cart.map(item => {
+                    return (
+                      <CartItem
+                        key={item.id}
+                        prod={item}
+                        addToCart={addToCart}
+                        decrementQuantity={decrementQuantity}
+                        removeFromCart={removeFromCart}
+                      />
+                    )
+                  })
                 )
               )}
 
@@ -53,23 +66,23 @@ export default function Cart(){
             <div className="space-y-3 mb-6">
               <div className="flex justify-between text-gray-600">
                 <span>Subtotal</span>
-                <span className="font-medium">200</span>
+                <span className="font-medium">${Number(subtotal).toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-gray-600">
                 <span>Envío</span>
-                <span className="font-medium">fdsfds</span>
+                <span className="font-medium">${shipping.toFixed(2)}</span>
               </div>
 
               <div className="flex justify-between text-gray-600">
                 <span>Descuento</span>
-                <span className="font-medium text-green-600">20%</span>
+                <span className="font-medium text-green-600">-$0.00</span>
               </div>
 
               <div className="pb-3.5 border-b border-gray-200 pt-3 mt-3">
                 <div className="flex justify-between text-lg">
                   <span className="font-bold">Total</span>
-                  <span className="font-bold">400</span>
+                  <span className="font-bold">${total.toFixed(2)}</span>
                 </div>
               </div>
             </div>
@@ -81,9 +94,9 @@ export default function Cart(){
         </div>
 
       </div>
-      
+
       {/* En el caso de que no haya items en el carrito no mostrara volver a la tienda aobajo, no el icono para vaciar el carrito */}
-      {cart.length > 0 && 
+      {cart.length > 0 &&
         <div className="mt-6">
           <a
             href="/"
@@ -95,14 +108,14 @@ export default function Cart(){
             Volver a la tienda
           </a>
 
-          <button className="p-2 text-shadow-black rounded-lg 
+          <button className="p-2 text-shadow-black rounded-lg
                 hover:scale-110
                 transition-all duration-200" onClick={clearCart} title="Vaciar carrito">
-            <ClearCartIcon/>
+            <ClearCartIcon />
           </button>
-      </div>
+        </div>
       }
-      
+
     </div>
   );
 
