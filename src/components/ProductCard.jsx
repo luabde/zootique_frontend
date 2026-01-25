@@ -2,10 +2,10 @@ import { useCart } from '../hook/useCart'
 import { AddCart } from './AddCartItem';
 import { RemoveCart } from './RemoveCartItem';
 
-export function ProductCard({ id, nombre, descr, precio, stock, tipo, url}) {
+export function ProductCard({ id, nombre, descr, precio, stock, tipo, url }) {
 
   // Llamamos al hook para poder usar el contexto del Cart
-  const { addToCart, cart, removeFromCart} = useCart()
+  const { addToCart, cart, removeFromCart } = useCart()
 
   const producto = {
     id,
@@ -18,10 +18,11 @@ export function ProductCard({ id, nombre, descr, precio, stock, tipo, url}) {
   };
 
   // Función para saber si un producto esta o no en el carrito para saber el icono de carrito que poner
-  const productInCart = id =>{
-    // Devuelve true si hay algun producto dentro del cart que tenga la misma id que el producto que se pasa sino devuelve false
-    return cart.some(prod => prod.id === id);
+  const getProductInCart = id => {
+    // Devuelve el producto si esta en el carrito, sino undefined
+    return cart.find(prod => prod.id === id);
   }
+  const itemInCart = getProductInCart(id);
   return (
     <div className="flex flex-col bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden w-full max-w-xs sm:max-w-sm">
       <div className="bg-gray-50 h-60 flex items-center justify-center">
@@ -63,29 +64,29 @@ export function ProductCard({ id, nombre, descr, precio, stock, tipo, url}) {
           {/* Condicional para que dependiendo de si el producto esta en el carrito o no se muestre el icono para añadir o eliminar en la card del producto */}
           {
             // Funcion para saber si el producto esta dentro del carrito
-            productInCart(id)
-            ?
-            <button
-            type="button"
-            onClick={() => removeFromCart(producto)}
-            className="p-2 text-shadow-black rounded-lg 
+            itemInCart
+              ?
+              <button
+                type="button"
+                onClick={() => removeFromCart(itemInCart)}
+                className="p-2 text-shadow-black rounded-lg 
                  hover:scale-110
                 transition-all duration-200"
-            title="Quitar del carrito"
-          >
-            <RemoveCart />
-            </button>
-            :
-            <button
-              type="button"
-              onClick={() => addToCart(producto)}
-              className="p-2 text-shadow-black rounded-lg 
+                title="Quitar del carrito"
+              >
+                <RemoveCart />
+              </button>
+              :
+              <button
+                type="button"
+                onClick={() => addToCart(producto)}
+                className="p-2 text-shadow-black rounded-lg 
                   hover:scale-110
                   transition-all duration-200"
-              title="Añadir al carrito"
-            >
-              <AddCart />
-          </button>
+                title="Añadir al carrito"
+              >
+                <AddCart />
+              </button>
           }
         </div>
       </div>
