@@ -76,7 +76,7 @@ export function CartItem({ prod, addToCart, decrementQuantity, removeFromCart })
                     <div className="flex flex-col items-start md:items-end">
                         <span className="text-xs text-gray-500 font-bold tracking-wide">Total</span>
                         <p className="text-emerald-700 text-xl font-bold">
-                            ${(Number(prod.precio) * Number(prod.cantidad)).toFixed(2)}
+                            ${Number(prod.precioTotalItem).toFixed(2)}
                         </p>
                     </div>
                 </div>

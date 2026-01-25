@@ -5,13 +5,8 @@ import { ClearCartIcon } from "../components/clearCartIcon";
 
 export default function Cart() {
 
-  const { cart, clearCart, addToCart, decrementQuantity, removeFromCart } = useCart()
+  const { cart, clearCart, addToCart, decrementQuantity, removeFromCart, subtotal } = useCart()
 
-  let subtotalCalculado = 0;
-  cart.forEach(item => {
-    subtotalCalculado += Number(item.precio) * Number(item.cantidad)
-  })
-  const subtotal = subtotalCalculado;
   const shipping = cart.length > 0 ? 5.99 : 0
   const discount = 0
   const total = subtotal - discount + shipping
