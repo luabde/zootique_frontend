@@ -2,63 +2,40 @@ import { useState, useEffect } from 'react'
 import { ProductCard } from '../components/ProductCard'
 
 export default function Home() {
-  const productos = [
-    {
-      id: 1, // ← ID añadido
-      nombre: "Pienso Premium para Perros",
-      descr: "Alimento completo y balanceado para perros adultos, rico en proteínas y vitaminas.",
-      precio: "29.99",
-      tipo: "Alimento",
-      stock: "50",
-      url: "/img/piensoPremium.png"
-    },
-    {
-      id: 2,
-      nombre: "Collar Antipulgas",
-      descr: "Collar repelente de pulgas y garrapatas, protección hasta 8 meses.",
-      precio: "15.50",
-      tipo: "Accesorio",
-      stock: "120",
-      url: "/img/collarAntipulgas.png"
-    },
-    {
-      id: 3,
-      nombre: "Arena Aglomerante para Gatos",
-      descr: "Arena higiénica con control de olores, fácil de limpiar.",
-      precio: "12.00",
-      tipo: "Higiene y cuidado",
-      stock: "200",
-      url: "/img/arenaAglomeranteGatos.png"
-    },
-    {
-      id: 4,
-      nombre: "Pelota con Sonido",
-      descr: "Juguete interactivo para perros, resistente y divertido.",
-      precio: "6.99",
-      tipo: "Juguete",
-      stock: "150",
-      url: "/img/pelota.png"
-    },
-    {
-      id: 5,
-      nombre: "Champú Antipulgas para Perros",
-      descr: "Champú dermatológicamente probado para eliminar pulgas y mantener la piel de tu perro sana y brillante.",
-      precio: "15.99",
-      tipo: "Higiene y cuidado",
-      stock: "25",
-      url: "/img/champuAntipulgasPerro.png"
-    },
-    {
-      id: 6,
-      nombre: "Acuario de 50 litros",
-      descr: "Acuario de vidrio con tapa y filtro incluido, perfecto para peces de agua dulce.",
-      precio: "120.00",
-      tipo: "Hábitat",
-      stock: "10",
-      url: "/img/acuario.png"
-    }
-  ];
+  const [productos, setProductos] = useState([]);
 
+  useEffect(() =>{
+    // UseEffect, se ejecuta cuando se carga la pagina
+
+    // Funcion para hacer el fetch a la bd
+    const cargarProductos = async () =>{
+      try{
+        const res = await fetch('http://localhost:3000/api/products');
+        const data = await res.json();
+        
+        const prodsFormateados = data.data.map(prod =>{
+          return{
+            id: prod._id,
+            nombre: prod.nombre,
+            descr: prod.descripcion,
+            precio: prod.precio.toString(),
+            tipo: prod.tipo,
+            stock: prod.stock.toString(),
+            url: prod.url
+          };
+        });
+
+        setProductos(prodsFormateados);
+      }catch(err){
+        console.error("Error al cargar los productos: ", err);
+      }
+    }
+
+    cargarProductos();
+
+  }) || [];
+
+  
    return(
     <>
       <div className="w-full">
