@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ProductCard } from '../components/ProductCard'
+import { Link } from "react-router-dom";
 
 export default function Home() {
   const [productos, setProductos] = useState([]);
@@ -25,7 +26,7 @@ export default function Home() {
           };
         });
 
-        setProductos(prodsFormateados);
+        setProductos(prodsFormateados.slice(0, 6));
       }catch(err){
         console.error("Error al cargar los productos: ", err);
       }
@@ -55,6 +56,23 @@ export default function Home() {
                 url={producto.url}
               />
             ))}
+          </div>
+          <div className='flex justify-center gap-1 items-center mt-8 mb-8'>
+            <Link to='/AllProducts' 
+              className="text-center flex justify-center items-center border-b-2 border-b-transparent hover:border-amber-300 duration-200 transition-all">Ver más productos
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>

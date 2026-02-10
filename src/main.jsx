@@ -8,6 +8,7 @@ import Login from './pages/login.jsx'
 import Register from './pages/Register.jsx'
 import Cart from './pages/Cart.jsx'
 import { CartProvider } from './context/cart.jsx'
+import AllProducts from './pages/AllProducts.jsx'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -20,6 +21,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path='cart' element={<Cart />}/>
+            <Route path='allProducts' element={<AllProducts></AllProducts>}></Route>
           </Route>
         </Routes>
       </BrowserRouter>
