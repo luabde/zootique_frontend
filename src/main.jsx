@@ -8,23 +8,32 @@ import Login from './pages/login.jsx'
 import Register from './pages/Register.jsx'
 import Cart from './pages/Cart.jsx'
 import { CartProvider } from './context/cart.jsx'
+import { CheckoutProvider } from './context/checkout.jsx'
 import AllProducts from './pages/AllProducts.jsx'
+import CheckoutInfo from './pages/Checkout/CheckoutInfo.jsx'
+import { CheckoutBilling } from './pages/checkout/CheckoutBilling.jsx'
+import { CheckoutComplete } from './pages/checkout/CheckoutComplete.jsx'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    {/* Envolver toda la app con CartProvider */}
+    {/* Envolver toda la app con CartProvider y checkout provider */}
     <CartProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<App />}>
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path='cart' element={<Cart />}/>
-            <Route path='allProducts' element={<AllProducts></AllProducts>}></Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <CheckoutProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<App />}>
+              <Route index element={<Home />} />
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
+              <Route path='cart' element={<Cart />}/>
+              <Route path='allProducts' element={<AllProducts></AllProducts>}></Route>
+              <Route path='checkout' element={<CheckoutInfo></CheckoutInfo>}></Route>
+              <Route path='checkout/billing' element={<CheckoutBilling></CheckoutBilling>}></Route>
+              <Route path='checkout/complete' element={<CheckoutComplete></CheckoutComplete>}></Route>
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </CheckoutProvider>
     </CartProvider>
   </React.StrictMode>
 )

@@ -2,6 +2,7 @@
 import { CartItem } from "../components/CartItem";
 import { useCart } from "../hook/useCart";
 import { ClearCartIcon } from "../components/clearCartIcon";
+import { Link } from "react-router-dom";
 
 export default function Cart() {
 
@@ -82,9 +83,9 @@ export default function Cart() {
               </div>
             </div>
 
-            <button className="mt-4 w-full py-2.5 px-4 rounded-lg font-medium   text-white bg-emerald-600 hover:bg-emerald-700 transition-colors duration-200 text-center no-underline block">
+            <Link to={"/checkout"} className="mt-4 w-full py-2.5 px-4 rounded-lg font-medium   text-white bg-emerald-600 hover:bg-emerald-700 transition-colors duration-200 text-center no-underline block">
               Pagar
-            </button>
+            </Link>
           </div>
         </div>
 
