@@ -15,7 +15,7 @@ export function CartProvider({ children }) {
     // Cuando se cargue el provider, se obtendran los productos del carrito
     useEffect(() => {
         getCartFromBackend();
-    }, []);
+    }, [user?.id]); // Ejecutamos de nuevo cuando cambie el user?.id
 
     const addToCart = async (product) => {
         const userId = user?.id;
