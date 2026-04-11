@@ -1,4 +1,5 @@
-import { children, createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { useAuth } from "../hook/useAuth";
 
 // Crear el contexto
 export const CartContext = createContext();
@@ -9,6 +10,7 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([])
     const [subtotal, setSubtotal] = useState(0)
     const [totalQuantity, setTotalQuantity] = useState(0)
+    const { user } = useAuth();
 
     // Cuando se cargue el provider, se obtendran los productos del carrito
     useEffect(() => {
@@ -16,9 +18,11 @@ export function CartProvider({ children }) {
     }, []);
 
     const addToCart = async (product) => {
+        const userId = user?.id;
+        if (!userId) return;
+
         // Verificar si el producto esta en el carrito
         const productInCart = cart.findIndex(item => item.id === product.id)
-        const userId = "691f7fc7d045de9c1bd6ff0e"; // Id de usuario provisional hasta tener sistema de usuarios en frontend
 
         // Cuando ya estaba en el carrito, a la cantidad del item se le añade 1
         if (productInCart >= 0) {
@@ -26,6 +30,7 @@ export function CartProvider({ children }) {
                 const item = cart[productInCart];
                 const res = await fetch(`http://localhost:3000/api/cart/${userId}/items/${item.itemId}`, {
                     method: 'PUT',
+                    credentials: "include",
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -55,6 +60,7 @@ export function CartProvider({ children }) {
         try {
             const res = await fetch(`http://localhost:3000/api/cart/${userId}/items`, {
                 method: 'POST',
+                credentials: "include",
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -80,13 +86,15 @@ export function CartProvider({ children }) {
     }
 
     const decrementQuantity = async (product) => {
-        const userId = "691f7fc7d045de9c1bd6ff0e"; // Id de usuario provisional hasta tener sistema de usuarios en frontend
+        const userId = user?.id;
+        if (!userId) return;
 
         if (product.cantidad > 1) {
             // Añadir al backend la nueva cantidad cuando la cantidad sea mayor que 1
             try {
                 const res = await fetch(`http://localhost:3000/api/cart/${userId}/items/${product.itemId}`, {
                     method: 'PUT',
+                    credentials: "include",
                     headers: {
                         'Content-Type': 'application/json'
                     },
@@ -115,12 +123,15 @@ export function CartProvider({ children }) {
     }
 
     const removeFromCart = async (product) => {
+        const userId = user?.id;
+        if (!userId) return;
+
         // Actualizar el carrito de la base de datos
         try {
-            const userId = "691f7fc7d045de9c1bd6ff0e"; // Id de usuario provisional hasta tener sistema de usuarios en frontend
             // Se le pasa el itemId, porque el product id no tiene que ver con el carrito, el que cuenta es el id del item dentro del carrito
             const res = await fetch(`http://localhost:3000/api/cart/${userId}/items/${product.itemId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: "include",
             });
 
             const data = await res.json();
@@ -141,12 +152,14 @@ export function CartProvider({ children }) {
     const clearCart = async () => {
         // setCart([])
 
-        // Actualizamos tambien la base de datos
-        const userId = "691f7fc7d045de9c1bd6ff0e"; // Id de usuario provisional hasta tener sistema de usuarios en frontend
+        const userId = user?.id;
+        if (!userId) return;
 
+        // Actualizamos tambien la base de datos
         try {
             const res = await fetch(`http://localhost:3000/api/cart/${userId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: "include",
             });
 
             const data = await res.json();
@@ -166,12 +179,26 @@ export function CartProvider({ children }) {
 
     // Función para obtener la info del carrito asociada a un user
     const getCartFromBackend = async () => {
-        const userId = "691f7fc7d045de9c1bd6ff0e"; // Id de usuario provisional hasta tener sistema de usuarios en frontend
+        const userId = user?.id;
+        if (!userId) {
+            setCart([]);
+            setSubtotal(0);
+            setTotalQuantity(0);
+            return;
+        }
 
         // Obtenemos el carrito, si no exixte para ese user, lo va a crear
-        const carrito = await fetch(`http://localhost:3000/api/cart/${userId}`)
-            .then(res => res.json())
-            .then(carrito => carrito.data);
+        const json = await fetch(`http://localhost:3000/api/cart/${userId}`, {
+            credentials: "include",
+        }).then((res) => res.json());
+        const carrito = json.data;
+
+        if (!carrito?.items) {
+            setCart([]);
+            setSubtotal(0);
+            setTotalQuantity(0);
+            return;
+        }
 
         const itemsFormateados = carrito.items.map(item => ({
             id: item.product_id._id,           // ID del producto
