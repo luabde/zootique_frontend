@@ -14,6 +14,7 @@ import AllProducts from './pages/AllProducts.jsx'
 import CheckoutInfo from './pages/Checkout/CheckoutInfo.jsx'
 import { CheckoutBilling } from './pages/checkout/CheckoutBilling.jsx'
 import { CheckoutComplete } from './pages/checkout/CheckoutComplete.jsx'
+import RequireAuth from './components/RequireAuth.jsx'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -27,11 +28,11 @@ createRoot(document.getElementById('root')).render(
               <Route index element={<Home />} />
               <Route path="login" element={<Login />} />
               <Route path="register" element={<Register />} />
-              <Route path='cart' element={<Cart />}/>
+              <Route path='cart' element={<RequireAuth><Cart /></RequireAuth>}/>
               <Route path='allProducts' element={<AllProducts></AllProducts>}></Route>
-              <Route path='checkout' element={<CheckoutInfo></CheckoutInfo>}></Route>
-              <Route path='checkout/billing' element={<CheckoutBilling></CheckoutBilling>}></Route>
-              <Route path='checkout/complete' element={<CheckoutComplete></CheckoutComplete>}></Route>
+              <Route path='checkout' element={<RequireAuth><CheckoutInfo></CheckoutInfo></RequireAuth>}></Route>
+              <Route path='checkout/billing' element={<RequireAuth><CheckoutBilling></CheckoutBilling></RequireAuth>}></Route>
+              <Route path='checkout/complete' element={<RequireAuth><CheckoutComplete></CheckoutComplete></RequireAuth>}></Route>
             </Route>
           </Routes>
       </CheckoutProvider>

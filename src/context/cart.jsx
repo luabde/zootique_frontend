@@ -1,4 +1,5 @@
 import { createContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hook/useAuth";
 
 // Crear el contexto
@@ -10,7 +11,8 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([])
     const [subtotal, setSubtotal] = useState(0)
     const [totalQuantity, setTotalQuantity] = useState(0)
-    const { user } = useAuth();
+    const { user, getSession } = useAuth();
+    const navigate = useNavigate();
 
     // Cuando se cargue el provider, se obtendran los productos del carrito
     useEffect(() => {
@@ -18,8 +20,15 @@ export function CartProvider({ children }) {
     }, [user?.id]); // Ejecutamos de nuevo cuando cambie el user?.id
 
     const addToCart = async (product) => {
-        const userId = user?.id;
-        if (!userId) return;
+        let userId = user?.id;
+        if (!userId) {
+            const r = await getSession();
+            if (!r?.ok || !r.usuario?.id) {
+                navigate("/login");
+                return;
+            }
+            userId = r.usuario.id;
+        }
 
         // Verificar si el producto esta en el carrito
         const productInCart = cart.findIndex(item => item.id === product.id)
@@ -87,7 +96,10 @@ export function CartProvider({ children }) {
 
     const decrementQuantity = async (product) => {
         const userId = user?.id;
-        if (!userId) return;
+        if (!userId) {
+            navigate("/login");
+            return;
+        }
 
         if (product.cantidad > 1) {
             // Añadir al backend la nueva cantidad cuando la cantidad sea mayor que 1
@@ -124,7 +136,10 @@ export function CartProvider({ children }) {
 
     const removeFromCart = async (product) => {
         const userId = user?.id;
-        if (!userId) return;
+        if (!userId) {
+            navigate("/login");
+            return;
+        }
 
         // Actualizar el carrito de la base de datos
         try {
@@ -153,7 +168,10 @@ export function CartProvider({ children }) {
         // setCart([])
 
         const userId = user?.id;
-        if (!userId) return;
+        if (!userId) {
+            navigate("/login");
+            return;
+        }
 
         // Actualizamos tambien la base de datos
         try {
