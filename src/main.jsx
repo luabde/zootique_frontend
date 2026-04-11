@@ -17,11 +17,11 @@ import { CheckoutComplete } from './pages/checkout/CheckoutComplete.jsx'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <BrowserRouter>
     <AuthProvider>
     {/* Envolver toda la app con CartProvider y checkout provider */}
     <CartProvider>
       <CheckoutProvider>
-        <BrowserRouter>
           <Routes>
             <Route path="/" element={<App />}>
               <Route index element={<Home />} />
@@ -34,9 +34,9 @@ createRoot(document.getElementById('root')).render(
               <Route path='checkout/complete' element={<CheckoutComplete></CheckoutComplete>}></Route>
             </Route>
           </Routes>
-        </BrowserRouter>
       </CheckoutProvider>
     </CartProvider>
     </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 )

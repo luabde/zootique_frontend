@@ -1,7 +1,56 @@
 import { Link } from "react-router-dom";
 import { InputComp } from "../components/input";
+import { useAuth } from "../hook/useAuth";
+import { useState } from "react";
 
 export default function Login() {
+  const { loginRequest } = useAuth();
+  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({
+    email: "",
+    contraseña: "",
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (error) setError(null);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    const required = [
+      ["email", "Email"],
+      ["contraseña", "Contraseña"],
+    ];
+    for (const [key, label] of required) {
+      const raw = formData[key];
+      const empty =
+        raw === undefined ||
+        raw === null ||
+        (typeof raw === "string" && raw.trim() === "");
+      if (empty) {
+        setError(`El campo «${label}» es obligatorio.`);
+        return;
+      }
+    }
+
+    const result = await loginRequest({
+      email: formData.email.trim(),
+      contraseña: formData.contraseña,
+    });
+
+    if (!result?.ok) {
+      setError(
+        result?.message ||
+          "No se pudo iniciar sesión. Inténtalo de nuevo."
+      );
+    }
+    /* Si va bien, loginRequest ya navega a "/" desde el contexto */
+  };
+
   return (
     <div className="relative flex justify-center items-center">
       
@@ -11,10 +60,32 @@ export default function Login() {
           <div className=" flex flex-col items-center justify-center lg:items-start gap-5 lg:max-w-5/6">
             <h2 className="text-3xl font-bold mb-8">Inicia Sessión</h2>
             <p>Ingresa tus credenciales para acceder a tu tienda de animales favorita.</p>
-            <form className="flex flex-col gap-6 w-full">
+            {error && (
+              <div
+                role="alert"
+                className="w-full rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+              >
+                {error}
+              </div>
+            )}
+            <form className="flex flex-col gap-6 w-full" onSubmit={handleLogin}>
               <div className="flex flex-col gap-4">
-                  <InputComp labelName="Email" placeholder="Tu email" type="text" />
-                  <InputComp labelName="Contraseña" placeholder="Tu contraseña" type="password" />
+                  <InputComp
+                    name="email"
+                    labelName="Email"
+                    placeholder="Tu email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                  <InputComp
+                    name="contraseña"
+                    labelName="Contraseña"
+                    placeholder="Tu contraseña"
+                    type="password"
+                    value={formData.contraseña}
+                    onChange={handleChange}
+                  />
               </div>
               <div className="flex flex-col md:flex-row justify-between">
                 <div className="flex items-center gap-2">
