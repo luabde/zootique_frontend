@@ -7,6 +7,7 @@ import Home from './pages/Home.jsx'
 import Login from './pages/login.jsx'
 import Register from './pages/Register.jsx'
 import Cart from './pages/Cart.jsx'
+import { AuthProvider } from './context/auth.jsx'
 import { CartProvider } from './context/cart.jsx'
 import { CheckoutProvider } from './context/checkout.jsx'
 import AllProducts from './pages/AllProducts.jsx'
@@ -16,6 +17,7 @@ import { CheckoutComplete } from './pages/checkout/CheckoutComplete.jsx'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <AuthProvider>
     {/* Envolver toda la app con CartProvider y checkout provider */}
     <CartProvider>
       <CheckoutProvider>
@@ -35,5 +37,6 @@ createRoot(document.getElementById('root')).render(
         </BrowserRouter>
       </CheckoutProvider>
     </CartProvider>
+    </AuthProvider>
   </React.StrictMode>
 )
