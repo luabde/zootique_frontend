@@ -1,6 +1,8 @@
 import { createContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE = "http://localhost:3000/api";
+
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -12,7 +14,7 @@ export function AuthProvider({ children }) {
    */
   async function registerRequest(userData) {
     try {
-      const res = await fetch(`http://localhost:3000/api/auth/registrar`, {
+      const res = await fetch(`${API_BASE}/auth/registrar`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         /** Necesario para que el navegador guarde las cookies httpOnly (accessToken, refreshToken) que envía Express */
@@ -45,18 +47,31 @@ export function AuthProvider({ children }) {
   }
 
   /**
-   * GET /api/auth/me — pide al backend quién es el usuario según la cookie accessToken.
-   * Tras un login correcto, el servidor ya envió las cookies; aquí solo leemos el perfil mínimo y guardamos user en React.
+   * GET /api/auth/me — sesión actual. Si el access caducó pero hay refresh válido, intenta renovar y vuelve a pedir /me.
    */
   async function getSession() {
     try {
-      const res = await fetch(`http://localhost:3000/api/auth/me`, {
+      let res = await fetch(`${API_BASE}/auth/me`, {
         credentials: "include",
       });
 
-      let data = await res.json();
+      let data = await res.json().catch(() => ({}));
+
+      if (!res.ok && (res.status === 401 || res.status === 403)) {
+        const ref = await fetch(`${API_BASE}/auth/refresh-token`, {
+          method: "POST",
+          credentials: "include",
+        });
+        if (ref.ok) {
+          res = await fetch(`${API_BASE}/auth/me`, {
+            credentials: "include",
+          });
+          data = await res.json().catch(() => ({}));
+        }
+      }
 
       if (!res.ok) {
+        setUser(null);
         return {
           ok: false,
           status: res.status,
@@ -64,7 +79,6 @@ export function AuthProvider({ children }) {
         };
       }
 
-      // Guardar el usuario en el estado
       setUser(data.data);
 
       return {
@@ -73,6 +87,7 @@ export function AuthProvider({ children }) {
         message: data.message,
       };
     } catch (err) {
+      setUser(null);
       return {
         ok: false,
         message: err?.message || "Error de red",
@@ -86,7 +101,7 @@ export function AuthProvider({ children }) {
    */
   async function refreshToken() {
     try {
-      const res = await fetch(`http://localhost:3000/api/auth/refresh-token`, {
+      const res = await fetch(`${API_BASE}/auth/refresh-token`, {
         method: "POST",
         credentials: "include",
       });
@@ -123,7 +138,7 @@ export function AuthProvider({ children }) {
   async function loginRequest(credentials) {
     try {
       // Paso A: validar credenciales y recibir cookies de sesión
-      const res = await fetch(`http://localhost:3000/api/auth/login`, {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -184,6 +199,22 @@ export function AuthProvider({ children }) {
     }
   }
 
+  async function logout() {
+    try {
+      const res = await fetch(`${API_BASE}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+      await res.json().catch(() => ({}));
+      setUser(null);
+      navigate("/");
+      return { ok: res.ok };
+    } catch (err) {
+      setUser(null);
+      return { ok: false, message: err?.message };
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
@@ -191,6 +222,7 @@ export function AuthProvider({ children }) {
         loginRequest,
         getSession,
         refreshToken,
+        logout,
         user,
       }}
     >
