@@ -1,90 +1,111 @@
-import { children, createContext, useEffect, useState } from "react";
-import { useRoutes } from "react-router-dom";
+import { createContext, useEffect, useState } from "react";
+import { useAuth } from "../hook/useAuth";
 
 export const CheckoutContext = createContext();
 
-export function CheckoutProvider({children}){
-    const userId = "691f7fc7d045de9c1bd6ff0e"; // Id de usuario provisional hasta tener sistema de usuarios en frontend
+export function CheckoutProvider({ children }) {
+    const { user: authUser } = useAuth();
+
+    /** Perfil completo desde GET /api/users/:id (direcciones, email, etc.) */
     const [user, setUser] = useState(null);
     const [addresses, setAddresses] = useState([]);
+
+    const userId = authUser?.id;
 
     const [shippingAddressId, setShippingAddressId] = useState(null);
     const [orderId, setOrderId] = useState(null);
 
-    // Estado del formulario de checkout
     const [formData, setFormData] = useState({
-        nombre: "", apellidos: "", email: "", telefono: "",
-        direccionElegida: ""
+        nombre: "",
+        apellidos: "",
+        email: "",
+        telefono: "",
+        direccionElegida: "",
     });
 
-    //  Obtener la info del user para autocompletado en el frontend
-    useEffect(()=>{
-        getUser();
-    }, []);
-
     const getUser = async () => {
+        if (!userId) {
+            setUser(null);
+            setAddresses([]);
+            return;
+        }
+
         try {
-            const res = await fetch(`http://localhost:3000/api/users/${userId}`);
+            const res = await fetch(`http://localhost:3000/api/users/${userId}`, {
+                credentials: "include",
+            });
             const json = await res.json();
-            console.log('User data loaded:', json.message);
+
+            if (!res.ok || json.status !== "success" || typeof json.message !== "object") {
+                return;
+            }
 
             setUser(json.message);
-            setAddresses(json.message.direcciones);
+            setAddresses(json.message.direcciones ?? []);
 
-            // Autocompletar formData con datos del usuario
-            setFormData(prev => ({
+            setFormData((prev) => ({
                 ...prev,
                 nombre: json.message.nombre || prev.nombre,
                 apellidos: json.message.apellidos || prev.apellidos,
                 email: json.message.email || prev.email,
-                telefono: json.message.telefono || prev.telefono
+                telefono: json.message.telefono || prev.telefono,
             }));
         } catch (err) {
-            console.error('Error loading user:', err);
+            console.error("Error loading user:", err);
         }
     };
 
-    // Función para manejar selección de dirección
+    useEffect(() => {
+        void getUser();
+    }, [userId]);
+
     const selectAddress = async (selectedAddressId) => {
         setShippingAddressId(selectedAddressId);
-        setFormData(prev => ({ ...prev, direccionElegida: selectedAddressId }));
+        setFormData((prev) => ({ ...prev, direccionElegida: selectedAddressId }));
     };
 
-    // Permite crear una nueva dirección al usuario desde el formulario de facturación
-    const createNewAddress = async (addressData) =>{
+    const createNewAddress = async (addressData) => {
+        if (!userId) return;
+
         try {
-            const res = await fetch(`http://localhost:3000/api/users/${userId}/direcciones`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(addressData)
-            });
+            const res = await fetch(
+                `http://localhost:3000/api/users/${userId}/direcciones`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(addressData),
+                }
+            );
 
             const json = await res.json();
             console.log("Dirección guardada en BD:", json);
 
-            // Seleccionar automáticamente la nueva dirección
-            setShippingAddressId(json.id); // Asumiendo que json.id es el ID de la nueva dirección
-            setFormData(prev => ({ ...prev, direccionElegida: json.id }));
+            const newId = json.data?._id ?? json.id;
+            if (newId) {
+                setShippingAddressId(newId);
+                setFormData((prev) => ({ ...prev, direccionElegida: newId }));
+            }
 
-            // Recargar usuario para obtener direcciones actualizadas
             await getUser();
-
         } catch (err) {
             console.error("Error creando dirección:", err);
         }
-
     };
 
     const createOrder = async (orderData) => {
+        if (!userId) return false;
+
         try {
             const res = await fetch(`http://localhost:3000/api/orders/${userId}`, {
                 method: "POST",
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(orderData)
+                body: JSON.stringify(orderData),
             });
-    
+
             const json = await res.json();
-            
+
             if (json.status === "success") {
                 setOrderId(json.data._id);
                 return true;
@@ -96,19 +117,21 @@ export function CheckoutProvider({children}){
         }
     };
 
-
-
-    return <CheckoutContext.Provider value={{
-        user,
-        addresses,
-        selectAddress,
-        createNewAddress,
-        shippingAddressId,
-        formData,
-        setFormData,
-        orderId,
-        createOrder
-        }}>
+    return (
+        <CheckoutContext.Provider
+            value={{
+                user,
+                addresses,
+                selectAddress,
+                createNewAddress,
+                shippingAddressId,
+                formData,
+                setFormData,
+                orderId,
+                createOrder,
+            }}
+        >
             {children}
-    </CheckoutContext.Provider>
+        </CheckoutContext.Provider>
+    );
 }
