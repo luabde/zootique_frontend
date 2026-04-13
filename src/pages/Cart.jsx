@@ -8,7 +8,7 @@ export default function Cart() {
 
   const { cart, clearCart, addToCart, decrementQuantity, removeFromCart, subtotal } = useCart()
 
-  const shipping = cart.length > 0 ? 5.99 : 0
+  const shipping = 0
   const discount = 0
   const total = subtotal - discount + shipping
 

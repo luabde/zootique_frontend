@@ -13,7 +13,7 @@ export default function CheckoutInfo() {
   const navigate = useNavigate();
   const { cart, subtotal } = useCart();
 
-  const shipping = cart.length > 0 ? 5.99 : 0;
+  const shipping = 0;
 
   const [errors, setErrors] = useState({});
 

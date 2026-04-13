@@ -11,7 +11,7 @@ export function CheckoutComplete() {
   const { cart, subtotal, clearCart } = useCart();
   const { user, formData, addresses, shippingAddressId, orderId, createOrder } = useCheckout();
   
-  const shipping = cart.length > 0 ? 5.99 : 0;
+  const shipping = 0;
   const total = subtotal + shipping;
 
   // Encontrar la dirección seleccionada para mostrar en el resumen

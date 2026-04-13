@@ -9,7 +9,7 @@ import {ContactIcon} from '../../components/checkout/contactIcon';
 
 export function CheckoutBilling(){
     const { cart, subtotal } = useCart();
-    const shipping = cart.length > 0 ? 5.99 : 0;
+    const shipping = 0;
     const navigate = useNavigate();
     const { user, formData, addresses, shippingAddressId } = useCheckout();
 

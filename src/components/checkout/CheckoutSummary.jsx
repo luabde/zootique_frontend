@@ -1,6 +1,6 @@
 // Sidebar reutilizable en todos los pasos del checkout
 
-export function CheckoutSummary({ cart = [], subtotal = 0, shipping = 5.99, discount = 0 }) {
+export function CheckoutSummary({ cart = [], subtotal = 0, shipping = 0, discount = 0 }) {
   const total = subtotal + shipping - discount;
 
   return (
