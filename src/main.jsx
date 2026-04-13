@@ -14,6 +14,7 @@ import AllProducts from './pages/AllProducts.jsx'
 import CheckoutInfo from './pages/Checkout/CheckoutInfo.jsx'
 import { CheckoutBilling } from './pages/checkout/CheckoutBilling.jsx'
 import { CheckoutComplete } from './pages/checkout/CheckoutComplete.jsx'
+import { ChackoutCancel } from './pages/checkout/chackoutCancel.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
 
 createRoot(document.getElementById('root')).render(
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')).render(
               <Route path='checkout' element={<RequireAuth><CheckoutInfo></CheckoutInfo></RequireAuth>}></Route>
               <Route path='checkout/billing' element={<RequireAuth><CheckoutBilling></CheckoutBilling></RequireAuth>}></Route>
               <Route path='checkout/complete' element={<RequireAuth><CheckoutComplete></CheckoutComplete></RequireAuth>}></Route>
+              <Route path='checkout/cancel' element={<RequireAuth><ChackoutCancel></ChackoutCancel></RequireAuth>}></Route>
             </Route>
           </Routes>
       </CheckoutProvider>
