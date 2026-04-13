@@ -26,7 +26,7 @@ export function CheckoutComplete() {
       })),
       direction_id: shippingAddressId,
       total_pedido: total,
-      estado: "preparacion",
+      estado: "pendiente",
       fecha_fin: new Date().toISOString()
     };
 
