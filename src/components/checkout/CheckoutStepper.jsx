@@ -2,8 +2,8 @@
 export function CheckoutStepper({ currentStep }) {
   const steps = [
     { id: 1, label: "Datos de envío", shortLabel: "Envío" },
-    { id: 2, label: "Pago",    shortLabel: "Pago" },
-    { id: 3, label: "Completado",           shortLabel: "Completado" },
+    { id: 2, label: "Resumen",        shortLabel: "Resumen" },
+    { id: 3, label: "Pago",           shortLabel: "Pago" },
   ];
 
   return (

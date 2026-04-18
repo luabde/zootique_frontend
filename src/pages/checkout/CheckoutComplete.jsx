@@ -3,19 +3,14 @@ import { useCart } from "../../hook/useCart";
 import { useCheckout } from "../../hook/useCheckout";
 import { CheckoutStepper } from "../../components/checkout/CheckoutStepper";
 import { CheckoutSummary } from "../../components/checkout/CheckoutSummary";
-import { ContactIcon } from "../../components/checkout/contactIcon";
-import { LocationIcon } from "../../components/checkout/locationIcon";
 
 export function CheckoutComplete() {
   const navigate = useNavigate();
-  const { cart, subtotal, clearCart } = useCart();
-  const { user, formData, addresses, shippingAddressId, orderId, createOrder } = useCheckout();
-  
+  const { cart, subtotal } = useCart();
+  const { shippingAddressId, createOrder } = useCheckout();
+
   const shipping = 0;
   const total = subtotal + shipping;
-
-  // Encontrar la dirección seleccionada para mostrar en el resumen
-  const selectedAddress = addresses.find(addr => addr._id === shippingAddressId);
 
   const handleConfirmOrder = async () => {
     const orderData = {
@@ -30,42 +25,24 @@ export function CheckoutComplete() {
       fecha_fin: new Date().toISOString()
     };
 
-    const success = await createOrder(orderData);
-    if (success) {
-        await clearCart(); 
-    }
-  };
+    // Creamos un array de productos para pasarlo a stripe mas adelante en el backend
+    const stripeProducts = cart.map(item => ({
+      name: item.nombre,
+      price: Number(item.precio),
+      quantity: Number(item.cantidad),
+    }));
 
-  // Si ya se ha realizado el pedido con éxito
-  if (orderId) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-gray-100 p-8 text-center animate-in fade-in zoom-in duration-500">
-          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">¡Pedido Realizado!</h2>
-          <p className="text-gray-500 mb-6">
-            Gracias por tu compra. Tu pedido <span className="font-semibold text-gray-800">#{orderId.slice(-8).toUpperCase()}</span> ha sido procesado correctamente.
-          </p>
-          <div className="space-y-3">
-            <button
-              onClick={() => navigate("/")}
-              className="w-full py-3 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all duration-200 shadow-lg shadow-emerald-100"
-            >
-              Volver a la tienda
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+    const sessionUrl = await createOrder(orderData, stripeProducts);
+    if (!sessionUrl) return;
+
+    // Usar redireccion en vede redirectToCheckout, ya que en la nueva version de stripe no se puede usar
+    window.location.href = sessionUrl;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="max-w-6xl mx-auto px-4 py-10 lg:px-8">
+
         {/* Header */}
         <div className="mb-8">
           <button
@@ -75,69 +52,50 @@ export function CheckoutComplete() {
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            Volver al pago
+            Volver al resumen
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Resumen y Confirmación</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Pago</h1>
         </div>
 
         {/* Stepper */}
         <CheckoutStepper currentStep={3} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Tarjeta Informativa de Resumen */}
+          <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-gray-800 mb-6">Revisa tus datos</h2>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {/* Contacto */}
-                <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      <ContactIcon />
-                    </div>
-                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Contacto</h3>
-                  </div>
-                  <div className="space-y-1 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl">
-                    <p className="font-bold text-gray-800">{formData.nombre} {formData.apellidos}</p>
-                    <p>{formData.email}</p>
-                    <p>{formData.telefono}</p>
-                  </div>
-                </div>
 
-                {/* Envío */}
-                <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                      <LocationIcon />
-                    </div>
-                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">Dirección de Envío</h3>
-                  </div>
-                  <div className="space-y-1 text-sm text-gray-600 bg-gray-50 p-4 rounded-xl">
-                    {selectedAddress ? (
-                      <>
-                        <p className="font-bold text-gray-800">{selectedAddress.calle}, {selectedAddress.numero_piso}</p>
-                        <p>{selectedAddress.codigo_postal} {selectedAddress.ciudad}</p>
-                        <p>{selectedAddress.provincia}, {selectedAddress.pais}</p>
-                      </>
-                    ) : (
-                      <p className="italic">Sin dirección seleccionada</p>
-                    )}
-                  </div>
+              {/* Icono + mensaje */}
+              <div className="flex flex-col items-center text-center py-6">
+                <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
                 </div>
+                <h2 className="text-lg font-bold text-gray-800 mb-1">Listo para pagar</h2>
+                <p className="text-sm text-gray-500 max-w-sm">
+                  Serás redirigido a la pasarela de pago segura de Stripe para completar la compra.
+                </p>
               </div>
 
-              {/* Botón de Acción Final */}
-              <div className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-100">
+              {/* Total destacado */}
+              <div className="bg-gray-50 rounded-xl p-4 flex items-center justify-between mb-8">
+                <span className="text-sm font-semibold text-gray-600">Total a pagar</span>
+                <span className="text-2xl font-bold text-gray-900">{Number(total).toFixed(2)}€</span>
+              </div>
+
+              {/* Botón de pago */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-100">
                 <p className="text-xs text-gray-400 max-w-xs text-center sm:text-left">
-                  Al hacer clic en "Confirmar y Pagar", aceptas nuestros términos y condiciones y procederemos a procesar tu pedido.
+                  Al confirmar aceptas nuestros términos y condiciones. No se guardará ningún dato de tu tarjeta.
                 </p>
                 <button
                   onClick={handleConfirmOrder}
                   disabled={cart.length === 0}
                   className="w-full sm:w-auto flex items-center justify-center gap-3 py-4 px-10 rounded-xl
                              font-bold text-sm transition-all duration-300
-                             bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200 active:scale-[0.98]"
+                             bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-200
+                             active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Confirmar y Pagar
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

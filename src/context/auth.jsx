@@ -7,6 +7,10 @@ export const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  // loading arranca en true porque al cargar la app aún no sabemos si hay sesión.
+  // Se pone a false cuando getSession() termina (con o sin usuario).
+  // Esto permite que RequireAuth espere antes de decidir si redirigir al login.
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   /**
@@ -72,6 +76,7 @@ export function AuthProvider({ children }) {
 
       if (!res.ok) {
         setUser(null);
+        setLoading(false); // sesión no encontrada → ya podemos tomar decisiones
         return {
           ok: false,
           status: res.status,
@@ -80,6 +85,7 @@ export function AuthProvider({ children }) {
       }
 
       setUser(data.data);
+      setLoading(false); // sesión encontrada → ya podemos tomar decisiones
 
       return {
         ok: true,
@@ -88,6 +94,7 @@ export function AuthProvider({ children }) {
       };
     } catch (err) {
       setUser(null);
+      setLoading(false); // error de red → ya podemos tomar decisiones
       return {
         ok: false,
         message: err?.message || "Error de red",
@@ -224,6 +231,7 @@ export function AuthProvider({ children }) {
         refreshToken,
         logout,
         user,
+        loading,
       }}
     >
       {children}

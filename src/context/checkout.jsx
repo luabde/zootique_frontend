@@ -93,8 +93,31 @@ export function CheckoutProvider({ children }) {
         }
     };
 
-    const createOrder = async (orderData) => {
-        if (!userId) return false;
+    const createCheckoutSession = async (stripeProducts, orderId) => {
+        try {
+            const sessionRes = await fetch("http://localhost:3000/api/checkout/create-session", {
+                method: "POST",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ products: stripeProducts, orderId }),
+            });
+
+            const sessionJson = await sessionRes.json();
+
+            if (!sessionRes.ok || !sessionJson.session_url) {
+                return null;
+            }
+
+            // devolvemos la url de la sesión de stripe para poder redirigir en el frontend
+            return sessionJson.session_url;
+        } catch (err) {
+            console.error("Error creando sesión de Stripe:", err);
+            return null;
+        }
+    };
+
+    const createOrder = async (orderData, stripeProducts) => {
+        if (!userId) return null;
 
         try {
             const res = await fetch(`http://localhost:3000/api/orders/${userId}`, {
@@ -107,13 +130,18 @@ export function CheckoutProvider({ children }) {
             const json = await res.json();
 
             if (json.status === "success") {
-                setOrderId(json.data._id);
-                return true;
+                // Una vez se crea la order, creamos la sesión de stripe para poder redirigir en el frontend
+                const newOrderId = json.data._id;
+                const sessionUrl = await createCheckoutSession(stripeProducts, newOrderId);
+                if (!sessionUrl) return null;
+
+                setOrderId(newOrderId);
+                return sessionUrl;
             }
-            return false;
+            return null;
         } catch (err) {
             console.error("Error creando pedido:", err);
-            return false;
+            return null;
         }
     };
 
