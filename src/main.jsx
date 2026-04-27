@@ -16,8 +16,12 @@ import { CheckoutBilling } from './pages/checkout/CheckoutBilling.jsx'
 import { CheckoutComplete } from './pages/checkout/CheckoutComplete.jsx'
 import { CheckoutSuccess } from './pages/checkout/CheckoutSuccess.jsx'
 import { ChackoutCancel } from './pages/checkout/chackoutCancel.jsx'
+import UserDashboard from './pages/UserDashboard.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
+import RequireAdmin from './components/RequireAdmin.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
 
+// Punto de entrada de la app: proveedores globales + definición de rutas.
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
@@ -32,6 +36,9 @@ createRoot(document.getElementById('root')).render(
               <Route path="register" element={<Register />} />
               <Route path='cart' element={<RequireAuth><Cart /></RequireAuth>}/>
               <Route path='allProducts' element={<AllProducts></AllProducts>}></Route>
+              <Route path='dashboard' element={<RequireAuth><UserDashboard /></RequireAuth>} />
+              {/* Ruta exclusiva de administradores */}
+              <Route path='admin/dashboard' element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
               <Route path='checkout' element={<RequireAuth><CheckoutInfo></CheckoutInfo></RequireAuth>}></Route>
               <Route path='checkout/billing' element={<RequireAuth><CheckoutBilling></CheckoutBilling></RequireAuth>}></Route>
               <Route path='checkout/complete' element={<RequireAuth><CheckoutComplete></CheckoutComplete></RequireAuth>}></Route>

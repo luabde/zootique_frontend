@@ -10,6 +10,7 @@ export default function App() {
   const { user, getSession, logout } = useAuth();
 
   useEffect(() => {
+    // Al montar la app, intentamos recuperar sesión desde cookies.
     void getSession();
   }, []);
 
@@ -50,9 +51,14 @@ export default function App() {
               className="flex max-w-full min-w-0 items-center gap-1.5 rounded-lg border border-gray-200/90 bg-white px-2 py-0.5 shadow-sm sm:gap-2 sm:px-2.5"
               title={user.nombre}
             >
-              <span className="min-w-0 max-w-40 sm:max-w-xs truncate text-sm font-medium text-gray-800">
+              <Link 
+                // Si el usuario es admin, desde su nombre va al panel admin.
+                // Si no, mantiene el flujo normal hacia su dashboard de cliente.
+                to={user?.rol === "admin" ? "/admin/dashboard" : "/dashboard"}
+                className="min-w-0 max-w-40 sm:max-w-xs truncate text-sm font-medium text-gray-800 hover:text-emerald-600 transition-colors"
+              >
                 {user.nombre}
-              </span>
+              </Link>
               <button
                 type="button"
                 onClick={handleLogout}
