@@ -1,7 +1,7 @@
 
 import { CartItem } from "../components/CartItem";
 import { useCart } from "../hook/useCart";
-import { ClearCartIcon } from "../components/clearCartIcon";
+import { ClearCartIcon } from "../components/ClearCartIcon";
 import { Link } from "react-router-dom";
 
 export default function Cart() {
